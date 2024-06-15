@@ -177,7 +177,7 @@ export const parseL3SpecialForm = (op: Sexp, params: Sexp[]): Result<CExp> =>
         isNonEmptyList<Sexp>(params) ? parseLitExp(first(params)) :
         makeFailure(`Bad quote exp: ${params}`) :
     op == "class" ?
-        isNonEmptyList<Sexp>(params) ? parseClassExp(params[0], params[1]) :
+        isNonEmptyList<Sexp>(params) ? parseClassExp(first(params), second(params)) :
         makeFailure(`Bad class: ${params}`) :
     makeFailure("Never");
 
@@ -238,18 +238,16 @@ const parseProcExp = (vars: Sexp, body: Sexp[]): Result<ProcExp> =>
                                                  makeProcExp(map(makeVarDecl, vars), cexps)) :
     makeFailure(`Invalid vars for ProcExp ${format(vars)}`);
 
-const parseClassExp = (varDecls: Sexp, bindings: Sexp): Result<ClassExp> => { // NEW
-    if (!(isArray(varDecls) && allT(isString, varDecls))) 
-        return makeFailure('Malformed fields in "class" expression');
-    if (!isGoodBindings(bindings)) 
-        return makeFailure('Malformed methodss in "class" expression');
-
-    const fields : VarDecl[] = map(makeVarDecl, varDecls);
-    const vars = map(b => b[0], bindings);
-    const vals : Result<CExp[]> = mapResult(binding => parseL3CExp(second(binding)), bindings);
-    const methods : Result<Binding[]> = bind(vals, (vs: CExp[]) => makeOk(zipWith(makeBinding, vars, vs)));
-    return bind(methods, (ms : Binding[]) => makeOk(makeClassExp(fields,ms)));
+const parseClassExp = (varDecls: Sexp, bindings: Sexp): Result<ClassExp> => {
+        if ((!(isArray(varDecls) && allT(isString, varDecls))) || !(isGoodBindings(bindings))) 
+            return makeFailure('Malformed var declarations or bindings in "class" expression');
+        const varExps : VarDecl[] = map(makeVarDecl, varDecls);
+        const vars = map(b => b[0], bindings);
+        const valsResult = mapResult(parseL3CExp, map(second, bindings));
+        const bindingsResult = mapv(valsResult, (vals: CExp[]) => zipWith(makeBinding, vars, vals));
+        return bind(bindingsResult, (methods : Binding[]) => makeOk(makeClassExp(varExps,methods)));
 }
+
 
 const isGoodBindings = (bindings: Sexp): bindings is [string, Sexp][] =>
     isArray(bindings) &&
@@ -325,8 +323,8 @@ const unparseLExps = (les: Exp[]): string =>
 const unparseProcExp = (pe: ProcExp): string => 
     `(lambda (${map((p: VarDecl) => p.var, pe.args).join(" ")}) ${unparseLExps(pe.body)})`
 
-const unparseClassExp = (cl: ClassExp) : string => 
-    `(class (${map((p: VarDecl) => p.var, cl.fields).join(" ")}) ${map((b: Binding) => `(${b.var.var} ${unparseL3(b.val)})`, cl.methods).join(" ")})`
+const unparseClassExp = (ce: ClassExp) : string => 
+    `(class (${map((f: VarDecl) => f.var, ce.fields).join(" ")}) (${map((b: Binding) => `(${b.var.var} ${unparseL3(b.val)})`, ce.methods).join(" ")}))`
 
 
 const unparseLetExp = (le: LetExp) : string => 
