@@ -5,11 +5,11 @@ import { map, filter } from "ramda";
 import { isBoolExp, isCExp, isLitExp, isNumExp, isPrimOp, isStrExp, isVarRef,
          isAppExp, isDefineExp, isIfExp, isLetExp, isProcExp,
          Binding, VarDecl, CExp, Exp, IfExp, LetExp, ProcExp, Program,
-         parseL3Exp,  DefineExp, isClassExp, ClassExp, makeClassExp} from "./L3-ast";
+         parseL3Exp,  DefineExp, isClassExp, ClassExp} from "./L3-ast";
 import { applyEnv, makeEmptyEnv, makeExtEnv, Env } from "./L3-env-env";
-import { isClosure, makeClosureEnv, Closure, Value,isClassSExp, makeClassSExp,ClassSExp,makeClassSExpEnv, isObject, Object, isSymbolSExp, makeObjectEnv } from "./L3-value";
+import { isClosure, makeClosureEnv, Closure, Value,isClassSExp, ClassSExp,makeClassSExpEnv, isObject, Object, isSymbolSExp, makeObjectEnv } from "./L3-value";
 import { applyPrimitive } from "./evalPrimitive";
-import { allT, first, rest, isEmpty, isNonEmptyList } from "../shared/list";
+import { first, rest, isEmpty, isNonEmptyList } from "../shared/list";
 import { Result, makeOk, makeFailure, bind, mapResult } from "../shared/result";
 import { parse as p } from "../shared/parser";
 import { format } from "../shared/format";
@@ -47,7 +47,7 @@ const evalIf = (exp: IfExp, env: Env): Result<Value> =>
 const evalProc = (exp: ProcExp, env: Env): Result<Closure> =>
     makeOk(makeClosureEnv(exp.args, exp.body, env));
 
-const evalClassExp = (exp: ClassExp, env: Env): Result<ClassSExp> => //NEW, TODO need to also assign env??
+const evalClassExp = (exp: ClassExp, env: Env): Result<ClassSExp> =>
     makeOk(makeClassSExpEnv(exp.fields, exp.methods, env));
 
 // KEY: This procedure does NOT have an env parameter.
