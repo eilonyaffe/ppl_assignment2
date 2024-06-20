@@ -52,7 +52,7 @@ const evalProc = (exp: ProcExp, env: Env): Result<Closure> =>
     makeOk(makeClosure(exp.args, exp.body));
 
     
-const evalClassExp = (exp: ClassExp, env: Env): Result<ClassSExp> => //NEW, TODO need to also assign env??
+const evalClassExp = (exp: ClassExp, env: Env): Result<ClassSExp> =>
     makeOk(makeClassSExp(exp.fields, exp.methods));
 
 const L3applyProcedure = (proc: Value, args: Value[], env: Env): Result<Value> =>
@@ -66,13 +66,13 @@ const L3applyProcedure = (proc: Value, args: Value[], env: Env): Result<Value> =
 // values into the body of the closure.
 // To make the types fit - computed values of params must be
 // turned back in Literal Expressions that eval to the computed value.
-const valueToLitExp = (v: Value): NumExp | BoolExp | StrExp | LitExp | PrimOp | ProcExp | ClassExp => //TODO remove ClassExp if not needed
+const valueToLitExp = (v: Value): NumExp | BoolExp | StrExp | LitExp | PrimOp | ProcExp | ClassExp =>
     isNumber(v) ? makeNumExp(v) :
     isBoolean(v) ? makeBoolExp(v) :
     isString(v) ? makeStrExp(v) :
     isPrimOp(v) ? v :
     isClosure(v) ? makeProcExp(v.params, v.body) :
-    isClassSExp(v) ? makeClassExp(v.fields, v.methods) : //TODO NEED?
+    isClassSExp(v) ? makeClassExp(v.fields, v.methods) :
     makeLitExp(v);
 
 const applyClosure = (proc: Closure, args: Value[], env: Env): Result<Value> => {
