@@ -48,7 +48,7 @@ import { Sexp, Token } from "s-expression";
 
 export type Exp = DefineExp | CExp;
 export type AtomicExp = NumExp | BoolExp | StrExp | PrimOp | VarRef;
-export type CompoundExp = AppExp | IfExp | ProcExp | LetExp | LitExp | ClassExp; // NEW
+export type CompoundExp = AppExp | IfExp | ProcExp | LetExp | LitExp | ClassExp;
 export type CExp =  AtomicExp | CompoundExp;
 
 export type Program = {tag: "Program"; exps: Exp[]; }
@@ -67,7 +67,7 @@ export type Binding = {tag: "Binding"; var: VarDecl; val: CExp; }
 export type LetExp = {tag: "LetExp"; bindings: Binding[]; body: CExp[]; }
 // L3
 export type LitExp = {tag: "LitExp"; val: SExpValue; }
-export type ClassExp = {tag: "ClassExp"; fields: VarDecl[], methods:Binding[];}  //NEW
+export type ClassExp = {tag: "ClassExp"; fields: VarDecl[], methods:Binding[];} 
 
 
 // Type value constructors for disjoint types
@@ -94,7 +94,7 @@ export const makeLetExp = (bindings: Binding[], body: CExp[]): LetExp =>
 // L3
 export const makeLitExp = (val: SExpValue): LitExp =>
     ({tag: "LitExp", val: val});
-export const makeClassExp = (fields: VarDecl[], methods:Binding[]): ClassExp => // NEW
+export const makeClassExp = (fields: VarDecl[], methods:Binding[]): ClassExp =>
     ({tag: "ClassExp", fields: fields, methods: methods});
 
 
@@ -221,7 +221,7 @@ const isPrimitiveOp = (x: string): boolean =>
      "number?", "boolean?", "symbol?", "string?"].includes(x);
 
 const isSpecialForm = (x: string): boolean =>
-    ["if", "lambda", "let", "quote", "class"].includes(x);  // NEW
+    ["if", "lambda", "let", "quote", "class"].includes(x);
 
 const parseAppExp = (op: Sexp, params: Sexp[]): Result<AppExp> =>
     bind(parseL3CExp(op), (rator: CExp) => 
@@ -269,7 +269,6 @@ const parseLetExp = (bindings: Sexp, body: Sexp[]): Result<LetExp> => {
                 mapv(mapResult(parseL3CExp, body), (body: CExp[]) =>
                      makeLetExp(bindings, body)));
 }
-
 
 // sexps has the shape (quote <sexp>)
 export const parseLitExp = (param: Sexp): Result<LitExp> =>
@@ -323,8 +322,8 @@ const unparseLExps = (les: Exp[]): string =>
 const unparseProcExp = (pe: ProcExp): string => 
     `(lambda (${map((p: VarDecl) => p.var, pe.args).join(" ")}) ${unparseLExps(pe.body)})`
 
-const unparseClassExp = (ce: ClassExp) : string => 
-    `(class (${map((f: VarDecl) => f.var, ce.fields).join(" ")}) (${map((b: Binding) => `(${b.var.var} ${unparseL3(b.val)})`, ce.methods).join(" ")}))`
+const unparseClassExp = (cl: ClassExp) : string => 
+    `(class (${map((p: VarDecl) => p.var, cl.fields).join(" ")}) (${map((b: Binding) => `(${b.var.var} ${unparseL3(b.val)})`, cl.methods).join(" ")}))`
 
 
 const unparseLetExp = (le: LetExp) : string => 
