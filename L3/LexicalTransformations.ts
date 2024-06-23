@@ -11,7 +11,7 @@ Type: ClassExp => ProcExp
 */
 
 export const makeNestedifs = (methods: Binding[]): IfExp => {
-    const curr = methods[0];
+    const curr: Binding = methods[0];
     return (methods.length == 1 ? makeIfExp(makeAppExp(makePrimOp("eq?"), [makeVarRef("msg"), makeLitExp(makeSymbolSExp(curr.var.var))]), makeAppExp(curr.val, []), makeBoolExp(false)):
     makeIfExp(makeAppExp(makePrimOp("eq?"), [makeVarRef("msg"), makeLitExp(makeSymbolSExp(curr.var.var))]), makeAppExp(curr.val, []), makeNestedifs(methods.slice(1))))
 }
@@ -47,9 +47,8 @@ export const lexTransform = (exp: Exp | Program): Result<Exp | Program> =>{
         isDefineExp(exp) ? makeDefineExp(exp.var, rewriteAllClassCExp(exp.val)) :
         exp;
 
-    const transformed = isExp(exp) ? rewriteAllClassExp(exp) :
+    const transformed: Exp | Program = isExp(exp) ? rewriteAllClassExp(exp) :
     isProgram(exp) ? makeProgram(map(rewriteAllClassExp, exp.exps)) :
     exp;
-
     return makeOk(transformed);
 }
